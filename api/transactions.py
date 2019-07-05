@@ -88,7 +88,7 @@ def buy(name, ticker, quantity, session=session):
 		session.add(t)
 		session.commit()
 
-def sell(name, ticker, quantity, session=session, dry_run=True):
+def sell(name, ticker, quantity, session=session):
 
 	trader = session.query(Account).filter_by(name=name).first()
 
@@ -103,11 +103,6 @@ def sell(name, ticker, quantity, session=session, dry_run=True):
 
 	# Sell all stock shares if the shares requested is greater than what is in the portfolio
 	quantity = quantity if c[ticker] > quantity else c[ticker]
-
-	if dry_run: 
-		
-		print('SELLING', ticker, quantity)
-		exit()
 
 	t = Transaction.sell(name=name, ticker=ticker, quantity=quantity, share_price=share_price)
 
