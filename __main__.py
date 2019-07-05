@@ -3,7 +3,7 @@ Command line interface for buying and selling stocks
 
 Usage:
   main.py (buy | sell) <name> <ticker> -q QUANTITY
-  main.py (portfolio | log | balance) <name>
+  main.py (portfolio | log) <name>
   main.py create_trader <name> -b BALANCE
 
 Options:
@@ -14,6 +14,7 @@ Options:
 from docopt import docopt
 
 from .api import (buy, 
+				  sell,
 				  create_trader,
 				  get_portfolio,
 				  get_log
@@ -23,9 +24,6 @@ from .api.utils import get_ticker_price
 
 options = docopt(__doc__)
 
-TRANSACTION_TEMPLATE = '{ticker:<10}{sep}{quantity:<20}{sep}{total_value:<20}{sep}'
-SEPARATOR = TRANSACTION_TEMPLATE.format(ticker='-' * 10, quantity='-' * 20, total_value='-' * 20, sep='+')
-
 if options['portfolio']:
 
 	get_portfolio(name=options['<name>'])
@@ -34,19 +32,17 @@ elif options['log']:
 
 	get_log(name=options['<name>'])
 
-elif options['balance']:
-
-	get_balance_sheet(name=options['<name>'])
-
 elif options['buy']:
 
 	buy(name=options['<name>'],
 		ticker=options['<ticker>'],
-		quantity=int(options['QUANTITY']))
+		quantity=int(options['--quantity']))
 
 elif options['sell']:
 
-	pass
+	sell(name=options['<name>'],
+		 ticker=options['<ticker>'],
+		 quantity=int(options['--quantity']))
 
 elif options['create_trader']:
 

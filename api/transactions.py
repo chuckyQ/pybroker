@@ -8,6 +8,7 @@ from .models import Account, Transaction
 from .utils import get_ticker_price
 
 __all__ = ['buy', 
+		   'sell',
 		   'create_trader', 
 		   'get_portfolio',
 		   'get_log']
@@ -64,7 +65,32 @@ def get_log(name, sesson=session):
 
 def buy(name, ticker, quantity, session=session):
 
-	trader = session.query(Trader).filter_by(name=name).first()
+	trader = session.query(Account).filter_by(name=name).first()
+
+	if not trader:
+
+		print(f'Trader {name!r} does not exist')
+		return
+
+	share_price = get_ticker_price(ticker)
+
+	if trader.balance < quantity * share_price:
+
+		print('Cannot complete transaction, not enough money')
+
+	else:
+		
+		t = Transaction.buy(name=name, ticker=ticker, quantity=quantity, share_price=share_price)
+
+		trader.balance -= quantity * share_price
+
+		session.add(trader)
+		session.add(t)
+		session.commit()
+
+def sell(name, ticker, quantity, session=session, dry_run=True):
+
+	trader = session.query(Account).filter_by(name=name).first()
 
 	if not trader:
 
@@ -73,19 +99,23 @@ def buy(name, ticker, quantity, session=session):
 	
 	share_price = get_ticker_price(ticker)
 
-	if trader.balance < quantity * share_price:
+	c = _get_aggregate_transactions(name=name)
 
-		print('Cannot complete transaction, not enough money')
+	# Sell all stock shares if the shares requested is greater than what is in the portfolio
+	quantity = quantity if c[ticker] > quantity else c[ticker]
 
-	else:
+	if dry_run: 
+		
+		print('SELLING', ticker, quantity)
+		exit()
 
-		t = Transaction.buy(name=name, ticker=ticker, quantity=quantity, share_price=share_price)
+	t = Transaction.sell(name=name, ticker=ticker, quantity=quantity, share_price=share_price)
 
-		trader.balance -= quantity * share_price
+	trader.balance += quantity * share_price
 
-		session.add(trader)
-		session.add(t)
-		session.commit()
+	session.add(trader)
+	session.add(t)
+	session.commit()
 
 def create_trader(name, balance, session=session):
 

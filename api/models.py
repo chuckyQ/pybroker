@@ -5,18 +5,7 @@ import os
 
 Base = declarative_base()
 
-POSSIBLE_ACTIONS = ['BUY', 'SELL', 'DEPOSIT', 'WITHDRAW']
- 
-class EdgarDocuments(Base):
-
-    __tablename__ = 'edgar_documents'
-
-    id = Column(Integer, Sequence('document_id_seq'), primary_key=True)
-    company_name = Column(String(100))
-    form_type = Column(String(10))
-    cik = Column(Integer())
-    date_filed = Column(String(len('2019-03-01')))
-    file_path = Column(String(200), unique=True) # FTP path to Edgar documentation
+POSSIBLE_ACTIONS = ['BUY', 'SELL']
 
 class Account(Base):
 
@@ -70,9 +59,13 @@ class Transaction(Base):
                            share_price=share_price)
 
     @classmethod
-    def sell(cls, name, ticker, quantity):
+    def sell(cls, name, ticker, quantity, share_price):
 
-        return Transaction(name, action='SELL', ticker=ticker, quantity=quantity)
+        return Transaction(name, 
+                           action='SELL', 
+                           ticker=ticker, 
+                           quantity=quantity, 
+                           share_price=share_price)
  
 if __name__ == "__main__":
 
