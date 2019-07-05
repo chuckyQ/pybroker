@@ -1,1 +1,0 @@
-A small Python command line interface for scripting simulated stock trades.
